@@ -1,6 +1,6 @@
 #!python3
 from argparse import ArgumentParser
-from os.path import isfile, exists
+from pathlib import Path
 from subprocess import run
 from time import time
 
@@ -10,42 +10,54 @@ start_time = time()
 parser = ArgumentParser(prog="qncm", description="Qncm is Not a Config Manager")
 parser.add_argument(
     "--from_dir",  # Can't use 'from' due to python limitations
-    default="/",
-    metavar="PATH",
-    help="directory to copy FROM (%(default)s)",
+    type=Path,
+    default=Path("/"),
+    metavar="",  # "PATH",
+    help="directory to copy from (%(default)s)",
 )
 parser.add_argument(
-    "--to",
-    default="qncm_save/",
-    metavar="PATH",
-    help="directory to copy TO (%(default)s)",
+    "--to_dir",  # _dir suffix for symmetry with from_dir
+    type=Path,
+    default=Path("qncm_save/"),
+    metavar="",  # "PATH",
+    help="directory to copy to (%(default)s)",
 )
 parser.add_argument(
     "--include",
-    default="list",
-    metavar="FILE",
+    type=Path,
+    default=Path("list"),
+    metavar="",  # "FILE",
     help="path to file which lists paths to copy (%(default)s)",
 )
 parser.add_argument(
     "--exclude",
-    metavar="FILE",
+    type=Path,
+    metavar="",  # "FILE",
     help="path to file which lists paths to not copy (%(default)s)",
 )
 parser.add_argument("--version", action="version", version="No version for now")
 
 args = parser.parse_args()
-if not isfile(args.include):
-    parser.exit(1, message=f"Include file '{args.include}' does not exist!\n")
-if args.exclude and not isfile(args.exclude):
-    parser.exit(1, message=f"Exclude file '{args.exclude}' does not exist!\n")
+
+if not args.from_dir.is_dir():
+    parser.exit(
+        1,
+        message=f"Directory passed to '--from_dir' ({args.from_dir}) does not exist!\n",
+    )
+if not args.include.is_file():
+    parser.exit(
+        1, message=f"File passed to '--include' ({args.include}) does not exist!\n"
+    )
+if args.exclude and not args.exclude.is_file:
+    parser.exit(
+        1, message=f"File passed to '--exclude' ({args.exclude}) does not exist!\n"
+    )
 
 
-with open(args.include, "r") as file:
-    include = file.read().splitlines()
+include = args.include.read_text(encoding="utf-8").splitlines()
 
 if args.exclude:
-    with open(args.exclude, "r") as file:
-        exclude = file.read().splitlines()
+    exclude = args.exclude.read_text(encoding="utf-8").splitlines()
 
 
 def print_result(status: str, msg: str = "") -> None:
@@ -76,14 +88,12 @@ for line in include:
         print_result("exclude", line)
         continue
 
-    path = args.from_dir + line  # TODO: use pathlib
-    if not exists(path):
+    path = args.from_dir / line
+    if not path.exists():
         print_result("warning", path)
         warnings.append(f"'{path}' does not exist!")
         continue
 
-    # print(path, "->", args.to + line)
-    # continue
     status = run(  # TODO: use pathlib!
         # "echo test",
         f"rsync -aR {path} {args.to}",
