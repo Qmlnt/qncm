@@ -9,31 +9,44 @@ start_time = time()
 
 parser = ArgumentParser(prog="qncm", description="Qncm is Not a Config Manager")
 parser.add_argument(
-    "--from_dir",  # Can't use 'from' due to python limitations
+    "--from",
+    dest="from_dir",
     type=Path,
     default=Path("/"),
-    metavar="",  # "PATH",
+    metavar="",  # PATH
     help="directory to copy from (%(default)s)",
 )
 parser.add_argument(
-    "--to_dir",  # _dir suffix for symmetry with from_dir
+    "--to",
+    dest="to_dir",
     type=Path,
     default=Path("qncm_save/"),
-    metavar="",  # "PATH",
+    metavar="",  # PATH
     help="directory to copy to (%(default)s)",
 )
 parser.add_argument(
-    "--include",
+    "--include_file",
     type=Path,
-    default=Path("list"),
-    metavar="",  # "FILE",
-    help="path to file which lists paths to copy (%(default)s)",
+    metavar="",  # FILE
+    help="file with paths to copy (%(default)s)",
 )
 parser.add_argument(
-    "--exclude",
+    "--include_list",
+    nargs="*",
+    metavar="",  # LIST
+    help="space separated paths to copy (%(default)s)",
+)
+parser.add_argument(
+    "--exclude_file",
     type=Path,
-    metavar="",  # "FILE",
-    help="path to file which lists paths to not copy (%(default)s)",
+    metavar="",  # FILE
+    help="file with paths to ignore (%(default)s)",
+)
+parser.add_argument(
+    "--exclude_list",
+    nargs="*",
+    metavar="",  # LIST
+    help="space separated paths to ignore (%(default)s)",
 )
 parser.add_argument("--version", action="version", version="No version for now")
 
@@ -44,20 +57,32 @@ if not args.from_dir.is_dir():
         1,
         message=f"Directory passed to '--from_dir' ({args.from_dir}) does not exist!\n",
     )
-if not args.include.is_file():
+if not (args.include_file or args.include_list):
     parser.exit(
-        1, message=f"File passed to '--include' ({args.include}) does not exist!\n"
+        1,
+        message="'--include_file' or/and '--include_list' must be specified!\n",
     )
-if args.exclude and not args.exclude.is_file:
+if args.include_file and not args.include_file.is_file():
     parser.exit(
-        1, message=f"File passed to '--exclude' ({args.exclude}) does not exist!\n"
+        1, message=f"File passed to '--include_file' ({args.include_file}) does not exist!\n"
+    )
+if args.exclude_file and not args.exclude_file.is_file():
+    parser.exit(
+        1, message=f"File passed to '--exclude_file' ({args.exclude_file}) does not exist!\n"
     )
 
+include = []
+if args.include_file:
+    include.extend(args.include_file.read_text(encoding="utf-8").splitlines())
+if args.include_list:
+    include.extend(["", "#From command line:"])
+    include.extend(args.include_list)
 
-include = args.include.read_text(encoding="utf-8").splitlines()
-
-if args.exclude:
-    exclude = args.exclude.read_text(encoding="utf-8").splitlines()
+exclude = []
+if args.exclude_file:
+    exclude.extend(args.exclude_file.read_text(encoding="utf-8").splitlines())
+if args.exclude_list:
+    exclude.extend(args.exclude_list)
 
 
 def print_result(status: str, msg: str = "") -> None:
@@ -82,9 +107,9 @@ for line in include:
         print_result("blank")
         continue
     if line[0] == "#":
-        print_result("comment", line)
+        print_result("comment", line[1:])
         continue
-    if args.exclude and line in exclude:
+    if line in exclude:
         print_result("exclude", line)
         continue
 
@@ -94,9 +119,9 @@ for line in include:
         warnings.append(f"'{path}' does not exist!")
         continue
 
-    status = run(  # TODO: use pathlib!
+    status = run(  # TODO: omit using subprocess
         # "echo test",
-        f"rsync -aR {path} {args.to}",
+        f"rsync -aR {path} {args.to_dir}",
         shell=True,
         capture_output=True,
         universal_newlines=True,
