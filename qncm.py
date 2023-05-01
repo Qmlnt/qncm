@@ -25,25 +25,33 @@ parser.add_argument(
     help="directory to copy to (%(default)s)",
 )
 parser.add_argument(
+    "-if",
     "--include_file",
+    dest="include_file",
     type=Path,
     metavar="",  # FILE
     help="file with paths to copy (%(default)s)",
 )
 parser.add_argument(
+    "-il",
     "--include_list",
+    dest="include_list",
     nargs="*",
     metavar="",  # LIST
     help="space separated paths to copy (%(default)s)",
 )
 parser.add_argument(
+    "-ef",
     "--exclude_file",
+    dest="exclude_file",
     type=Path,
     metavar="",  # FILE
     help="file with paths to ignore (%(default)s)",
 )
 parser.add_argument(
+    "-el",
     "--exclude_list",
+    dest="exclude_list",
     nargs="*",
     metavar="",  # LIST
     help="space separated paths to ignore (%(default)s)",
@@ -64,12 +72,15 @@ if not (args.include_file or args.include_list):
     )
 if args.include_file and not args.include_file.is_file():
     parser.exit(
-        1, message=f"File passed to '--include_file' ({args.include_file}) does not exist!\n"
+        1,
+        message=f"File passed to '--include_file' ({args.include_file}) does not exist!\n",
     )
 if args.exclude_file and not args.exclude_file.is_file():
     parser.exit(
-        1, message=f"File passed to '--exclude_file' ({args.exclude_file}) does not exist!\n"
+        1,
+        message=f"File passed to '--exclude_file' ({args.exclude_file}) does not exist!\n",
     )
+
 
 include = []
 if args.include_file:
