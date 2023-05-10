@@ -1,4 +1,4 @@
-#!python3
+#!/bin/python3
 from argparse import ArgumentParser
 from pathlib import Path
 from subprocess import run
@@ -7,7 +7,11 @@ from time import time
 
 start_time = time()
 
-parser = ArgumentParser(prog="qncm", description="Qncm is Not a Config Manager")
+parser = ArgumentParser(
+    prog="qncm",
+    description="""Qncm is Not a Config Manager.
+    qncm uses rsync to copy files, preserving the tree.""",
+)
 parser.add_argument(
     "--from",
     dest="from_dir",
@@ -56,7 +60,7 @@ parser.add_argument(
     metavar="",  # LIST
     help="space separated paths to ignore (%(default)s)",
 )
-parser.add_argument("--version", action="version", version="No version for now")
+parser.add_argument("--version", action="version", version="1.0")
 
 args = parser.parse_args()
 
@@ -131,7 +135,6 @@ for line in include:
         continue
 
     status = run(  # TODO: omit using subprocess
-        # "echo test",
         f"rsync -aR {path} {args.to_dir}",
         shell=True,
         capture_output=True,

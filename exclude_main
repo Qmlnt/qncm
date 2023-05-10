@@ -1,0 +1,4 @@
+/etc/doas.conf
+/boot/refind_linux.conf
+/boot/EFI/refind/refind.conf
+/etc/connman/
