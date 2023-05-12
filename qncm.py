@@ -60,7 +60,7 @@ parser.add_argument(
     metavar="",  # LIST
     help="space separated paths to ignore (%(default)s)",
 )
-parser.add_argument("--version", action="version", version="1.0")
+parser.add_argument("--version", action="version", version="1.1")
 
 args = parser.parse_args()
 
@@ -128,7 +128,7 @@ for line in include:
         print_result("exclude", line)
         continue
 
-    path = args.from_dir / line
+    path = args.from_dir / line.lstrip("/ ")
     if not path.exists():
         print_result("warning", path)
         warnings.append(f"'{path}' does not exist!")
@@ -141,9 +141,9 @@ for line in include:
         universal_newlines=True,
     )
     if status.returncode:
-        print_result("error", line)
+        print_result("error", path)
     else:
-        print_result("success", line)
+        print_result("success", path)
 
 
 if warnings:
