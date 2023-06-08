@@ -1,3 +1,4 @@
+# Files i don't need to touch
 /etc/doas.conf
 /boot/refind_linux.conf
 /boot/EFI/refind/refind.conf

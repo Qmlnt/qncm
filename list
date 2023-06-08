@@ -2,16 +2,17 @@
 
 /etc/vconsole.conf
 /etc/pacman.conf
-/etc/pacman.d/hooks/zsh.hook
 /etc/doas.conf
 /etc/sudo.conf
 /etc/mkinitcpio.conf
 /etc/nsswitch.conf
-/etc/udev/rules.d/69-hdparm.rules
-/usr/lib/systemd/system-sleep/hdparm
-/etc/tmpfiles.d/energy_performance_preference.conf
 /etc/ssh/sshd_config
+/usr/lib/systemd/system-sleep/hdparm
 
+/etc/tmpfiles.d/
+/etc/sysctl.d/
+/etc/udev/rules.d/
+/etc/pacman.d/hooks/
 /etc/optimus-manager/
 /etc/X11/xorg.conf.d/
 /etc/systemd/system/kbdrate.service
@@ -38,4 +39,5 @@
 /home/qmlnt/Documents/hints/
 /home/qmlnt/Programming/Python/qncm/qncm.py
 /home/qmlnt/Programming/Python/qncm/list
-/home/qmlnt/Programming/Python/qncm/exclude_main
+/home/qmlnt/Programming/Python/qncm/exclude
+/home/qmlnt/Backups/important/
